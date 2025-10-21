@@ -17,13 +17,13 @@ public final class RoadPlacementHandler implements PlacementHandler {
 
         int[] rc = CoordinatePrompter.askCoord(
             in, out,
-            "Place ROAD. Row must be 2. Allowed columns: 0 (left edge), 2 (center), 4 (right edge).\n"+
-            "Starter board example: (2 0) left extension, (2 2) center, (2 4) right extension. Enter row col (or 'cancel'):",
-            (r,c) -> r == 2 && (c == 0 || c == 2 || c == 4),
-            "Row must be 2 and column must be 0, 2, or 4."
+            "Place ROAD. Row must be 2. Choose any empty column. Road must be adjacent to a settlement or city.\n"+
+            "Enter row col (or 'cancel'):",
+            (r,c) -> r == 2,
+            "Row must be 2 and column must be a valid board column."
         );
         if (rc == null) { out.println("Road placement cancelled."); return false; }
-    if (!pr.canPlaceRoadAt(rc[0], rc[1])) { out.println("Illegal road placement at ("+rc[0]+","+rc[1]+") — row must be 2 and slot must be empty."); return false; }
+        if (!pr.canPlaceRoadAt(rc[0], rc[1])) { out.println("Illegal road placement at ("+rc[0]+","+rc[1]+") — must be empty and adjacent to a settlement or city."); return false; }
         pr.placeRoadAt(rc[0], rc[1]);
         out.println("Placed Road at ("+rc[0]+","+rc[1]+").");
         BoardPrinter.printPlayerBoard(p, out);

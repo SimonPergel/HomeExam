@@ -194,8 +194,12 @@ public class DeckManager {
             else if (n.equals("weaver's shop") || n.equals("weavers shop") || n.equals("weaver’s shop")) target = Resource.WOOL;
 
             if (target != null){
-                // Only meaningful next to regions on the same row (top=1 or bottom=3)
-                if (row != 1 && row != 3) continue;
+                // Buildings on far rows (0/4) should behave like near rows (1/3)
+                int effectiveRow = row;
+                if (row == 0) effectiveRow = 1;      // far top behaves like top row
+                else if (row == 4) effectiveRow = 3; // far bottom behaves like bottom row
+                // Only meaningful next to regions on the (effective) same row
+                if (effectiveRow != 1 && effectiveRow != 3) continue;
                 // Determine the display column where this building appears
                 int displayCol = -1;
                 for (int c = 0; c < cols; c++){
@@ -207,7 +211,8 @@ public class DeckManager {
                 for (int dc : new int[]{-1, +1}){
                     int rc = displayCol + dc;
                     if (rc < 0 || rc >= cols) continue;
-                    var rt = princ.getRegionAt(row, rc);
+                    // Look for neighboring region on the effective row
+                    var rt = princ.getRegionAt(effectiveRow, rc);
                     if (rt == null) continue;
                     if (rt.getResource() != target) continue;
                     if (rt.getDie() != roll) continue;

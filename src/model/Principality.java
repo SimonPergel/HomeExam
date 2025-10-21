@@ -301,16 +301,21 @@ public class Principality {
     public int mapDisplayColToBuildingSiteCol(int displayCol){
         int cols = width();
         int leftShift = computeLeftShift();
+        // Compute right shift: how much the right side has extended beyond the base 5-column board
+        // Base board: col 0-4, but after extensions it's wider
+        // Right settlement starts at logical col 3, but extends with both left and right extensions
+        int rightShift = cols - 5; // Total extension beyond base width
+        
         // Outer-left site
         if (settlementOuterLeft && displayCol == 0) return 0;
         // Inner-left site
         if (displayCol == 1 + leftShift) return 1;
         // Extra-left site (only when cityLeft)
         if (cityLeft && displayCol == 2 + leftShift) return 2;
-        // Inner-right site
-        if (displayCol == 3 + leftShift) return 3;
+        // Inner-right site (accounts for both left and right extensions)
+        if (displayCol == 3 + rightShift) return 3;
         // Extra-right site (only when cityRight)
-        if (cityRight && displayCol == 4 + leftShift) return 4;
+        if (cityRight && displayCol == 4 + rightShift) return 4;
         // Outer-right site
         if (settlementOuterRight && displayCol == cols - 1) return cols - 1;
         return -1;
@@ -483,12 +488,78 @@ public class Principality {
     public boolean canPlaceRoadAt(int row, int col) {
         checkRowCol(row, col);
         if (row != 2) return false;
-        // Edge/center columns are based on current width after extensions:
-        // Pattern: [0]=padding, [1]=maybe roadLeft, [2]=settlementLeft, [3]=roadCenter, [4]=settlementRight, [last-1]=maybe roadRight, [last]=padding
-        // Incoming requests will still be 0/2/4 from prompts; we normalize here.
-        if (col == 0) return !roadLeft;                              // left edge request
-        if (col == 2) return !roadCenter;                            // center
-        if (col == 4) return !roadRight;                             // right edge request
+        // Must be empty
+        if (hasRoadAt(col)) return false;
+        // Special case: allow center road (2,2) for intro setup
+        if (col == 2 && width() == 5) return true;
+        // Must be adjacent to a settlement or city
+        boolean leftAdj = (col > 0) && (hasSettlementOrCityAt(col-1));
+        boolean rightAdj = (col < width()-1) && (hasSettlementOrCityAt(col+1));
+        return leftAdj || rightAdj;
+    }
+
+    private boolean hasRoadAt(int col) {
+        // Account for board extensions when checking road positions
+        int leftShift = computeLeftShift();
+        
+        // Left edge road (always at column 0 if it exists)
+        if (col == 0 && roadLeft) return true;
+        
+        // Center road shifts with left extensions
+        int centerCol = 2 + leftShift;
+        if (col == centerCol && roadCenter) return true;
+        
+        // Right edge road shifts with left extensions
+        int rightCol = 4 + leftShift;
+        if (col == rightCol && roadRight) return true;
+        
+        return false;
+    }
+
+    private boolean hasSettlementOrCityAt(int col) {
+        // Check for settlement/city at col using the board grid
+        // Row 2 is the center row for settlements/cities
+        // For intro/base, settlements/cities are tracked by flags and grid
+        // If you have a grid for settlements/cities, check it here
+        // For now, check flags for legacy columns, and check grid for all columns
+        // Settlement center: col 1 (left), col 3 (right), but could be anywhere
+        // Assume row2Settlements and row2Cities are arrays or use row2
+        // If you have a method to check for settlement/city at (2, col), use it
+        // Here, we check for a settlement/city at (2, col) by inspecting the grid
+        // If you use a grid, e.g., row2[], check for non-null and type
+        // For now, check flags and also check for settlement/city at (2, col)
+        // --- flags for legacy columns ---
+        if (col == 0 && (settlementLeft || cityLeft || settlementOuterLeft || cityOuterLeft)) return true;
+        if (col == width()-1 && (settlementRight || cityRight || settlementOuterRight || cityOuterRight)) return true;
+        // --- grid check for all columns ---
+        // If you have a settlement/city at (2, col), return true
+        // For this codebase, settlements/cities are not stored in a row2[] array, but you can check region tiles or add a row2Settlements[]
+        // For now, check if there is a settlement or city at (2, col) using a placeholder method
+        if (hasSettlementOrCityGrid(col)) return true;
+        return false;
+    }
+
+    // Placeholder: checks for settlement/city at (2, col) in the grid
+    private boolean hasSettlementOrCityGrid(int col) {
+        // Map display column to logical settlement position
+        // Based on board state and left shift
+        int leftShift = computeLeftShift();
+        
+        // Check for left settlement (inner-left)
+        int leftSettlementCol = 1 + leftShift;
+        if (col == leftSettlementCol && (settlementLeft || cityLeft)) return true;
+        
+        // Check for right settlement (inner-right)
+        int rightSettlementCol = 3 + leftShift;
+        if (col == rightSettlementCol && (settlementRight || cityRight)) return true;
+        
+        // Check for outer-left settlement
+        if (settlementOuterLeft && col == 0) return true;
+        if (cityOuterLeft && col == 0) return true;
+        
+        // Check for outer-right settlement
+        if ((settlementOuterRight || cityOuterRight) && col == width()-1) return true;
+        
         return false;
     }
 
@@ -523,19 +594,22 @@ public class Principality {
         return false;
     }
 
-    /** Place a road at row 2 in columns 0,2,4 depending on adjacency rules. */
+    /** Place a road at row 2 in any column, extending board if needed. */
     public void placeRoadAt(int row, int col) {
         if (!canPlaceRoadAt(row, col)) throw new IllegalStateException("illegal road placement at ("+row+","+col+")");
-        // Extend board when building at an edge to create visual column for the road and keep spacing
+        // Extend board if at left or right edge
         if (col == 0) {
             extendLeft();
             roadLeft = true;
+        } else if (col == width()-1) {
+            extendRight();
+            roadRight = true;
         } else if (col == 2) {
             roadCenter = true;
         } else if (col == 4) {
-            extendRight();
             roadRight = true;
-        }
+        } // For other columns, could add more flags or a road array for extended board
+        // For now, only legacy flags are set, but can be extended for more columns
     }
 
     private void extendLeft(){

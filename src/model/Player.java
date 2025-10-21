@@ -10,6 +10,14 @@ import java.util.EnumMap;
 import java.util.List;
 
 public class Player {
+    // Brigitta event die control flag
+    private boolean brigittaEventDieControl = false;
+
+    public void markBrigittaEventDieControl() { this.brigittaEventDieControl = true; }
+    public boolean consumeBrigittaEventDieControl() {
+        if (brigittaEventDieControl) { brigittaEventDieControl = false; return true; }
+        return false;
+    }
     private final String name;
     private final EnumMap<Resource,Integer> res = new EnumMap<>(Resource.class);
     private final Deque<BasicCard> hand = new ArrayDeque<>();

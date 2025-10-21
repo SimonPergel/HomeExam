@@ -118,6 +118,13 @@ public class GameController {
         ioB.out().println("[ProductionDie] -> " + roll);
     }
 
+    // --- Victory helper: check both players and announce winner; return true if game should end ---
+    private boolean checkVictory(Player a, Player b) {
+        if (rules.hasWon(a)) { declareWinner(a); return true; }
+        if (rules.hasWon(b)) { declareWinner(b); return true; }
+        return false;
+    }
+
     // --- Marketplace ongoing effect ---
     private void applyMarketplaceBonus(int roll, Player p, Player opp){
         var princP = p.principality();
@@ -302,6 +309,7 @@ public class GameController {
                     ioFor(opponent).out().println("Trade 3:1 -> +1 " + getR);
                     // Show updated board and hand to active player after action
                     printBoardAndHand(current, out);
+                    if (checkVictory(current, opponent)) return; // end immediately on win
                 } else {
                     out.println("Usage: TRADE3 <get> <give> ([Brick|Grain|Lumber|Wool|Ore|Gold])");
                 }
@@ -337,6 +345,7 @@ public class GameController {
                     ioFor(opponent).out().println("Trade 2:1 (" + fromR + " ship) -> +1 " + getR);
                     // Show updated board and hand to active player after action
                     printBoardAndHand(current, out);
+                    if (checkVictory(current, opponent)) return;
                 } else {
                     out.println("Usage: TRADE2 <get> <give> ([Brick|Grain|Lumber|Wool|Ore|Gold])");
                 }
@@ -376,7 +385,9 @@ public class GameController {
                     if (nm == null || !nm.equalsIgnoreCase("Large Trade Ship")) continue;
                     int adjCol = bc + ("R".equals(side) ? 1 : -1);
                     if (adjCol < 0 || adjCol >= width) continue;
-                    var adjReg = pr.getRegionAt(br, adjCol);
+                    // Parity: if LTS is on far rows (0 or 4), treat adjacency as if on 1 or 3 respectively
+                    int effectiveRow = (br == 0) ? 1 : (br == 4 ? 3 : br);
+                    var adjReg = pr.getRegionAt(effectiveRow, adjCol);
                     if (adjReg == null) continue;
                     if (adjReg.getResource() != fromR) continue; // not the requested resource
                     foundMatchingResource = true;
@@ -396,12 +407,14 @@ public class GameController {
                 // Perform trade against that single adjacent region
                 int br = chosenSite[0], bc = chosenSite[1];
                 int adjCol = bc + ("R".equals(side) ? 1 : -1);
-                var adjReg = pr.getRegionAt(br, adjCol);
+                int effectiveRow = (br == 0) ? 1 : (br == 4 ? 3 : br);
+                var adjReg = pr.getRegionAt(effectiveRow, adjCol);
                 adjReg.setStored(adjReg.getStored() - 2);
                 addStored(current, toR, 1);
                 out.println("LTS trade: -2 " + fromR + " (adjacent " + side + "), +1 " + toR + ".");
                 ioFor(opponent).out().println("LTS trade: -2 " + fromR + " (adjacent " + side + "), +1 " + toR + ".");
                 printBoardAndHand(current, out);
+                if (checkVictory(current, opponent)) return;
                 continue;
             }
             if (lower.startsWith("play ")) {
@@ -474,17 +487,22 @@ public class GameController {
                 continue;
             }
 
-            // 5) If not placed, run effect (action/hero/etc.)
-            if (!placed) {
+            // 5) If placed, show board and check victory; otherwise run effect (action/hero/etc.)
+            if (placed) {
+                printBoardAndHand(current, out);
+                if (checkVictory(current, opponent)) return;
+            } else {
                 var eff = chosen.getEffect();
                 if (eff != null) {
                     eff.apply(makeContext(current, opponent));
                     out.println("Played: " + chosen.getName());
                     // After any action effect resolves, show updated board + hand
                     printBoardAndHand(current, out);
+                    if (checkVictory(current, opponent)) return;
                 } else {
                     out.println("Played: " + chosen.getName() + " (no effect wired yet).");
                     printBoardAndHand(current, out);
+                    if (checkVictory(current, opponent)) return;
                 }
             }
             // loop again so the player can play more cards or 'skip'

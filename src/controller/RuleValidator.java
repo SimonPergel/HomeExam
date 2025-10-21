@@ -23,9 +23,11 @@ public class RuleValidator {
         this.cfg = cfg;
     }
 
-    /** Base-game victory condition. */
+    /** Base-game victory condition.
+     * Use Principality.Points VP, since VP is tracked there across placements/effects.
+     */
     public boolean hasWon(Player p) {
-        return p.getVictoryPoints() >= cfg.victoryPointsToWin();
+        return p.principality().getPoints().getVP() >= cfg.victoryPointsToWin();
     }
 
     // ---------------------------- COSTS ----------------------------

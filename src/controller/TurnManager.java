@@ -44,15 +44,23 @@ public class TurnManager {
 
         ts.markDiceRolled();
 
+        // Immediate victory check after dice/event resolution (VP may change due to events or production effects)
+        if (rules.hasWon(current)) { game.declareWinner(current); return; }
+        if (rules.hasWon(opponent)) { game.declareWinner(opponent); return; }
+
         // After Part 1 (dice resolved), print recap on both terminals
         game.printTurnRecap(current, opponent);
 
         // Action phase & end-of-turn flow
         game.actionPhase(current, opponent);
+        // If a winner emerged during action phase, stop turn immediately
+        if (rules.hasWon(current)) { game.declareWinner(current); return; }
+        if (rules.hasWon(opponent)) { game.declareWinner(opponent); return; }
         game.replenish(current);
+        if (rules.hasWon(current)) { game.declareWinner(current); return; }
+        if (rules.hasWon(opponent)) { game.declareWinner(opponent); return; }
         game.exchange(current);
-        if (rules.hasWon(current)) {
-            game.declareWinner(current);
-        }
+        if (rules.hasWon(current)) { game.declareWinner(current); return; }
+        if (rules.hasWon(opponent)) { game.declareWinner(opponent); return; }
     }
 }
