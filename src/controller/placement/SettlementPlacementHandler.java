@@ -1,6 +1,7 @@
 package src.controller.placement;
 
 import src.controller.GameContext;
+import src.controller.DeckManager;
 import src.model.BasicCard;
 import src.model.Principality;
 import src.view.BoardPrinter;
@@ -79,8 +80,18 @@ public final class SettlementPlacementHandler implements PlacementHandler {
                 int colForRegions = Math.max(0, princ.width() - 1);
                 // Draw two region cards from center stack via DeckManager
                 var dm = ctx.decks();
-                var topCard = dm.drawRegionCard();
-                var bottomCard = dm.drawRegionCard();
+                
+                // Check if Scout is active
+                boolean scoutActive = ctx.turn() != null && ctx.turn().isScoutActive();
+                
+                var topCard = scoutActive ? promptScoutRegionChoice(ctx, dm, "first") : dm.drawRegionCard();
+                var bottomCard = scoutActive ? promptScoutRegionChoice(ctx, dm, "second") : dm.drawRegionCard();
+                
+                // Clear Scout flag after using it
+                if (scoutActive && ctx.turn() != null) {
+                    ctx.turn().clearScoutActive();
+                }
+                
                 if (topCard != null) {
                     // Infer resource from card name, assign die via pool
                     src.model.Resource resTop = inferRegionResource(topCard.getName());
@@ -105,8 +116,18 @@ public final class SettlementPlacementHandler implements PlacementHandler {
                 // The newly added column sits at index 0.
                 int colForRegions = 0;
                 var dm = ctx.decks();
-                var topCard = dm.drawRegionCard();
-                var bottomCard = dm.drawRegionCard();
+                
+                // Check if Scout is active
+                boolean scoutActive = ctx.turn() != null && ctx.turn().isScoutActive();
+                
+                var topCard = scoutActive ? promptScoutRegionChoice(ctx, dm, "first") : dm.drawRegionCard();
+                var bottomCard = scoutActive ? promptScoutRegionChoice(ctx, dm, "second") : dm.drawRegionCard();
+                
+                // Clear Scout flag after using it
+                if (scoutActive && ctx.turn() != null) {
+                    ctx.turn().clearScoutActive();
+                }
+                
                 if (topCard != null) {
                     src.model.Resource resTop = inferRegionResource(topCard.getName());
                     int dieTop = dm.nextAssignedDieFor(resTop).orElse(1);
@@ -148,5 +169,46 @@ public final class SettlementPlacementHandler implements PlacementHandler {
         if (n.contains("pasture")) return src.model.Resource.WOOL;
         if (n.contains("mountain")) return src.model.Resource.ORE;
         return src.model.Resource.WOOD;
+    }
+
+    /**
+     * Helper method for Scout: prompt player to choose a region from the stack.
+     * Shows available regions and accepts name or index input.
+     */
+    private src.model.Card promptScoutRegionChoice(GameContext ctx, DeckManager dm, String ordinal) {
+        var in = ctx.in();
+        var out = ctx.out();
+        
+        // Show available regions
+        var regionStack = dm.getRegionStackSnapshot();
+        if (regionStack.isEmpty()) {
+            out.println("SCOUT: Region stack is empty, cannot choose.");
+            return null;
+        }
+        
+        out.println("SCOUT - Choose " + ordinal + " region (name or index):");
+        for (int i = 0; i < Math.min(regionStack.size(), 10); i++) { // show first 10
+            out.println("  [" + i + "] " + regionStack.get(i).getName());
+        }
+        if (regionStack.size() > 10) {
+            out.println("  ... and " + (regionStack.size() - 10) + " more");
+        }
+        
+        out.print("Enter region name or index: ");
+        String choice = in.readLine();
+        if (choice == null || choice.trim().isEmpty()) {
+            // Fallback to top card
+            out.println("No choice made, taking top card.");
+            return dm.drawRegionCard();
+        }
+        
+        src.model.Card selected = dm.drawRegionByChoice(choice.trim());
+        if (selected == null) {
+            out.println("Invalid choice, taking top card as fallback.");
+            return dm.drawRegionCard();
+        }
+        
+        out.println("Selected: " + selected.getName());
+        return selected;
     }
 }

@@ -225,6 +225,51 @@ public class DeckManager {
     public Card drawCityCard(){ return cities.pollFirst(); }
     public Card drawRegionCard(){ return regions.pollFirst(); }
 
+    /**
+     * Get a snapshot of the region stack (for Scout card to display choices).
+     * Returns a read-only list.
+     */
+    public java.util.List<Card> getRegionStackSnapshot() {
+        return new java.util.ArrayList<>(regions);
+    }
+
+    /**
+     * Draw a specific region card by name or index (for Scout card).
+     * Returns the card and removes it from the stack, or null if not found.
+     * @param nameOrIndex either the card name (case-insensitive) or a numeric index (0-based)
+     */
+    public Card drawRegionByChoice(String nameOrIndex) {
+        if (nameOrIndex == null || nameOrIndex.trim().isEmpty()) return null;
+        
+        // Try to parse as index first
+        try {
+            int idx = Integer.parseInt(nameOrIndex.trim());
+            if (idx >= 0 && idx < regions.size()) {
+                // Remove card at that index
+                java.util.ArrayList<Card> list = new java.util.ArrayList<>(regions);
+                Card selected = list.remove(idx);
+                regions.clear();
+                regions.addAll(list);
+                return selected;
+            }
+        } catch (NumberFormatException ignored) {}
+        
+        // Try to match by name (case-insensitive)
+        String target = nameOrIndex.trim().toLowerCase();
+        java.util.ArrayList<Card> list = new java.util.ArrayList<>(regions);
+        for (int i = 0; i < list.size(); i++) {
+            Card c = list.get(i);
+            if (c != null && c.getName() != null && c.getName().toLowerCase().contains(target)) {
+                Card selected = list.remove(i);
+                regions.clear();
+                regions.addAll(list);
+                return selected;
+            }
+        }
+        
+        return null; // not found
+    }
+
     /** Returns next assigned die for a resource, or empty if no assignment remains. */
     public Optional<Integer> nextAssignedDieFor(Resource r){
         Deque<Integer> dq = regionDicePool.get(r);

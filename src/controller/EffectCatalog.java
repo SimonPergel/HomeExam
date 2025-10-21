@@ -76,6 +76,7 @@ public final class EffectCatalog {
                 .alias("brigitta, the wise woman", "brigitta")
                 .alias("brigitta, the wise women", "brigitta")
                 .register("relocation", RelocationEffect::new)
+                .register("scout", src.controller.actions.Scout::new)
                 .register("abbey", AbbeyEffect::new)
                 // Generic buildings (placed via GenericBuildingPlacementHandler). Effects are mostly passive.
                 .register("marketplace", MarketplaceEffect::new)
