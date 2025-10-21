@@ -3,7 +3,6 @@ package src.controller;
 import java.util.*;
 import java.util.function.Supplier;
 
-// Import effects from other packages:
 import src.controller.actions.BrigittaTheWiseEffect;
 import src.controller.actions.GoldsmithEffect;
 import src.controller.actions.MerchantEffect;
@@ -23,17 +22,13 @@ import src.controller.event.YuleEffect;
 import src.controller.eventDieEvents.BrigandEffect;
 import src.controller.eventDieEvents.CelebrationEffect;
 import src.controller.eventDieEvents.TradeEffect;
-// If you later add a dedicated PlentifulHarvest effect under eventDieEvents,
-// switch the mapping below from HarvestEffect to that class.
 
 import src.controller.settlement.buildings.AbbeyEffect;
 import src.controller.settlement.buildings.TollBridgeEffect;
 import src.controller.settlement.buildings.MarketplaceEffect;
 import src.controller.settlement.buildings.StorehouseEffect;
 
-// Common heroes
 import src.controller.settlement.units.CommonHeroEffect;
-// Common trade ships
 import src.controller.settlement.units.CommonTradeShipEffect;
 import src.controller.settlement.units.LargeTradeShipEffect;
 import src.model.Resource;

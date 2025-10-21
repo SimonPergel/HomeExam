@@ -52,7 +52,7 @@ public class Main {
         while(true){
             turns.playTurn(game, current, opp);
             if (rules.hasWon(current)) break;
-            var tmp = current; current = opp; opp = tmp; // swap
+            var tmp = current; current = opp; opp = tmp;
         }
     }
 }
