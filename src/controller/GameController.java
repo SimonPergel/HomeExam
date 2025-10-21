@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class GameController {
     private final TurnManager turns;
-    private TurnState currentTurnState; // changed
+    private TurnState currentTurnState;
     private final DeckManager decks;
     private final RuleValidator rules;
     private final Randomizer rng;
@@ -39,7 +39,6 @@ public class GameController {
         this.in = in;
         this.out = out;
 
-        // Java 8+ safe (use Arrays.asList)
         this.placementRegistry = new src.controller.placement.PlacementRegistry(
             Arrays.asList(
                 new src.controller.placement.RoadPlacementHandler(),
@@ -54,8 +53,6 @@ public class GameController {
         );
     }
 
-    // ---- helpers you asked to add (INSIDE the class) ----
-
     /** Register IO for a specific player (console or socket-backed). */
     public void registerPlayerIO(Player p, IPlayerIO io) {
         if (p != null && io != null) playerIO.put(p, io);
@@ -64,7 +61,6 @@ public class GameController {
     private IPlayerIO ioFor(Player p) {
         IPlayerIO io = playerIO.get(p);
         if (io != null) return io;
-        // fallback to shared console IO
         return new IPlayerIO() {
             @Override public IInputService in() { return in; }
             @Override public IOutputService out() { return out; }
@@ -74,7 +70,7 @@ public class GameController {
     /** Seed starting region storage like the old server UI: non-gold 1/3, gold 0/3. */
     public void seedStartingStorageFor(src.model.Player p){
         var princ = p.principality();
-        for (int row : new int[]{0, 2}) {            // top & bottom region rows
+        for (int row : new int[]{0, 2}) {
             for (int col = 0; col < 5; col++) {
                 var t = princ.getRegionAt(row, col);
                 if (t == null) continue;
@@ -96,9 +92,6 @@ public class GameController {
         src.view.BoardPrinter.printPlayerBoard(me, out);
     }
 
-    // ---- existing API ----
-
-    // add setter
     public void setCurrentTurnState(TurnState ts) { this.currentTurnState = ts; }
 
     public GameContext makeContext(Player current, Player opponent){

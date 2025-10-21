@@ -72,11 +72,8 @@ public class Player {
         return stored;
     }
 
-    // temporary progression counter
     private int progressPoints = 0;
-    //public int getProgressPoints(){ return progressPoints; }
     public void setProgressPoints(int v){ progressPoints = Math.max(0, v); }
-    //public void addProgressPoints(int delta){ progressPoints = Math.max(0, progressPoints + delta); }
 
     public void addToHand(BasicCard c){ hand.add(c); }
     public int getHandSize(){ return hand.size(); }
