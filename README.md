@@ -1,4 +1,17 @@
-# HomeExam
+# HomeExam - Rivals for Catan Implementation
+
+## Documentation
+
+This repository contains a refactored implementation of Rivals for Catan following SOLID principles and best practices.
+
+**Key Documentation:**
+- **[DESIGN_REPORT.md](DESIGN_REPORT.md)** - Comprehensive design analysis including SOLID principles, Booch metrics, quality attributes, and design patterns
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture overview and technical implementation details
+- **[TEST_SUMMARY.md](TEST_SUMMARY.md)** - Unit test coverage and testing approach
+
+## Quick Start
+
+See the build instructions below to compile and run the game.
 
 __Folder/class structure__
 
