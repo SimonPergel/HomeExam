@@ -109,11 +109,53 @@ public class GameController {
 
     public void produce(int roll, Player a, Player b){
         decks.applyProduction(roll, a, b);
+    // Marketplace passive: if opponent has more regions showing this number, gain 1 resource your opponent can normally receive
+        applyMarketplaceBonus(roll, a, b);
+        applyMarketplaceBonus(roll, b, a);
         // Broadcast production die in legacy format
         var ioA = ioFor(a); var ioB = ioFor(b);
         ioA.out().println("[ProductionDie] -> " + roll);
         ioB.out().println("[ProductionDie] -> " + roll);
     }
+
+    // --- Marketplace ongoing effect ---
+    private void applyMarketplaceBonus(int roll, Player p, Player opp){
+        var princP = p.principality();
+        if (!princP.hasBuildingNamed("Marketplace")) return;
+        int countP = countRegionsWithDie(princP, roll);
+        int countO = countRegionsWithDie(opp.principality(), roll);
+        if (countO <= countP) return; // only when opponent has strictly more
+
+        // Allowed resources = any resource the opponent can normally receive (has at least one region of that type)
+        java.util.EnumSet<src.model.Resource> allowed = java.util.EnumSet.noneOf(src.model.Resource.class);
+        for (var t : opp.principality().regions()) if (t != null) allowed.add(t.getResource());
+        // Prompt current player to choose one; enforce storage capacity
+        var io = ioFor(p);
+        src.model.Resource chosen = null;
+        for (int tries = 0; tries < 10; tries++){
+            io.out().println("Marketplace: Opponent has more regions with number " + roll + ". Choose 1 resource they can normally receive ("+friendlyList(allowed)+"): ");
+            String line = io.in().readLine();
+            src.model.Resource r = parseResource(line);
+            if (r == null || !allowed.contains(r)) { io.out().println("Invalid choice, try again."); continue; }
+            if (!hasCapacityFor(p, r, 1)) { io.out().println("No space to store that resource; choose another."); continue; }
+            chosen = r; break;
+        }
+        if (chosen == null) return; // no valid choice made
+        addStored(p, chosen, 1);
+        var ioOpp = ioFor(opp);
+        String msg = p.getName()+" receives +1 "+friendly(chosen)+" from Marketplace.";
+        io.out().println(msg);
+        ioOpp.out().println(msg);
+    }
+
+    private int countRegionsWithDie(src.model.Principality pr, int die){
+        int n = 0;
+        var m = pr.produce(die); // returns counts per resource
+        for (var e : m.values()) n += e;
+        return n;
+    }
+
+    // storage helpers are defined later in the class (trade section)
 
     public void broadcastEventDie(int face, Player a, Player b){
         var ioA = ioFor(a); var ioB = ioFor(b);
@@ -671,6 +713,24 @@ public class GameController {
         }
     }
 
+    // Friendly resource name helpers for messages
+    private String friendly(src.model.Resource r){
+        switch (r){
+            case WOOD:  return "Lumber";
+            case BRICK: return "Brick";
+            case ORE:   return "Ore";
+            case WHEAT: return "Grain";
+            case WOOL:  return "Wool";
+            case GOLD:  return "Gold";
+            default:    return r.name();
+        }
+    }
+    private String friendlyList(java.util.EnumSet<src.model.Resource> set){
+        java.util.ArrayList<String> names = new java.util.ArrayList<>();
+        for (var r : set) names.add(friendly(r));
+        return String.join(", ", names);
+    }
+
     // ===== UI helpers =====
     private String badge(String value, String label){
         if (value == null || value.isBlank()) return "";
@@ -700,6 +760,8 @@ public class GameController {
         if (n.equals("large trade ship")) return "CP1";
         // Toll Bridge grants +1 CP on placement in this ruleset
         if (n.equals("toll bridge")) return "CP1";
+        // Marketplace grants +1 CP on placement
+        if (n.equals("marketplace")) return "CP1";
         return "";
     }
 

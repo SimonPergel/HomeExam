@@ -27,8 +27,18 @@ public class BrigandEffect implements ICardEffect {
 
     /** Returns total tokens removed (Wool + Gold) from storage for player p. */
     private int applyTo(Player p){
+        // Storehouse passive: do not count the two neighboring regions per Storehouse when checking the >7 threshold.
         int total = 0;
-        for (RegionTile t : p.principality().regions()) total += t.getStored();
+        var princ = p.principality();
+        java.util.Set<Integer> protectedCols = princ.getRegionColsProtectedByStorehouses();
+        int cols = princ.width();
+        for (int c = 0; c < cols; c++){
+            if (protectedCols.contains(c)) continue; // skip counting for protected columns
+            RegionTile top = princ.getRegionAt(1, c);
+            RegionTile bot = princ.getRegionAt(3, c);
+            if (top != null) total += Math.max(0, top.getStored());
+            if (bot != null) total += Math.max(0, bot.getStored());
+        }
         if (total <= 7) return 0;
         int removed = 0;
         for (RegionTile t : p.principality().regions()){

@@ -169,6 +169,14 @@ public class Principality {
         return null;
     }
 
+    /** Returns settlement column for a given building site column.
+     * Mapping: 2 -> 1 (left city extra), 4 -> 3 (right city extra), others map to themselves. */
+    private int mapBuildingSiteColToSettlementCol(int siteCol){
+        if (siteCol == 2) return 1;
+        if (siteCol == 4) return 3;
+        return siteCol;
+    }
+
     /** Clear a building from a site (no point side-effects). Returns the removed name or null. */
     public String clearBuildingAt(int row, int col){
         String prev = getBuildingAt(row, col);
@@ -255,6 +263,26 @@ public class Principality {
             || (buildingBottomOuterLeft != null && buildingBottomOuterLeft.equalsIgnoreCase(target))
             || (buildingTopOuterRight != null && buildingTopOuterRight.equalsIgnoreCase(target))
             || (buildingBottomOuterRight != null && buildingBottomOuterRight.equalsIgnoreCase(target));
+    }
+
+    /** Columns of regions (top/bottom rows) that should be excluded from Brigand counting due to Storehouses.
+     * Any Storehouse placed adjacent to a settlement/city protects the two neighboring regions of that settlement/city
+     * from being counted toward the >7 threshold during a Brigand Attack. This does NOT exempt them from removal
+     * if the threshold is exceeded for other reasons. */
+    public java.util.Set<Integer> getRegionColsProtectedByStorehouses(){
+        java.util.HashSet<Integer> cols = new java.util.HashSet<>();
+        int w = width();
+        // Check all occupied building sites; if it's a Storehouse, map its site to its associated settlement column.
+        for (int[] rc : getOccupiedBuildingSites()){
+            int r = rc[0], c = rc[1];
+            String name = getBuildingAt(r, c);
+            if (name == null) continue;
+            if (!name.equalsIgnoreCase("Storehouse")) continue;
+            int settleCol = mapBuildingSiteColToSettlementCol(c);
+            // Guard against dynamic outer-right index
+            if (settleCol >= 0 && settleCol < w) cols.add(settleCol);
+        }
+        return java.util.Collections.unmodifiableSet(cols);
     }
 
     /** Rule convenience: Parish Hall reduces Exchange search cost to 1. */

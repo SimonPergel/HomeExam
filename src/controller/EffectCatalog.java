@@ -28,6 +28,8 @@ import src.controller.eventDieEvents.TradeEffect;
 
 import src.controller.settlement.buildings.AbbeyEffect;
 import src.controller.settlement.buildings.TollBridgeEffect;
+import src.controller.settlement.buildings.MarketplaceEffect;
+import src.controller.settlement.buildings.StorehouseEffect;
 
 // Common heroes
 import src.controller.settlement.units.CommonHeroEffect;
@@ -76,8 +78,8 @@ public final class EffectCatalog {
                 .register("relocation", RelocationEffect::new)
                 .register("abbey", AbbeyEffect::new)
                 // Generic buildings (placed via GenericBuildingPlacementHandler). Effects are mostly passive.
-                .register("marketplace", () -> ctx -> ctx.out().println("Marketplace placed: passive effect (example: reminder only)."))
-                .register("storehouse", () -> ctx -> ctx.out().println("Storehouse placed: passive effect (reminder only)."))
+                .register("marketplace", MarketplaceEffect::new)
+                .register("storehouse", StorehouseEffect::new)
                 .register("toll bridge", TollBridgeEffect::new)
                 .alias("tool brige", "toll bridge")
                 .register("brick factory", () -> ctx -> {})
