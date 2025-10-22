@@ -55,15 +55,17 @@ src/
 ## Build and Run
 
 ```bash
-cd /home/runner/work/HomeExam/HomeExam/src
+# from /home/simon/HomeExam-refactored-updated/src
 rm -rf ../bin
 mkdir -p ../bin
-javac -cp ../gson.jar -d ../bin $(find . -name "*.java")
-java -cp ../bin:../gson.jar Main
+
+# compile with the gson.jar one level up
+javac -d ../bin -cp "../gson.jar" $(find . -name "*.java")
+
+# Terminal A (host)
+java -cp "../bin:../gson.jar" src.network.Server
+
+# Terminal B (client)
+java -cp "../bin:../gson.jar" src.network.Server online
 
 ```
-    - Not required to be feature-complete; we keep the IO/network boundaries so you can plug it in later if you want, but we won’t add era/expansion logic.
-
-**Extensibility (no extra content implemented)**
-
-    - We keep EffectRegistry, CardFactory, RuleValidator, and GameConfig design so future packs can register—but we won’t add any extra cards/eras now.
