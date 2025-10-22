@@ -1,30 +1,5 @@
 # HomeExam - Rivals for Catan Implementation
 
-## Documentation
-
-This repository contains a refactored implementation of Rivals for Catan following SOLID principles and best practices.
-
-**Key Documentation:**
-- **[DESIGN_REPORT.md](DESIGN_REPORT.md)** - Comprehensive design analysis including SOLID principles, Booch metrics, quality attributes, and design patterns
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture overview and technical implementation details
-- **[TEST_SUMMARY.md](TEST_SUMMARY.md)** - Unit test coverage and testing approach
-
-**Project Structure & Diagrams:**
-- **[FOLDER_STRUCTURE.md](FOLDER_STRUCTURE.md)** - Complete folder and class structure with detailed diagrams
-- **[FOLDER_CONNECTIONS.md](FOLDER_CONNECTIONS.md)** - Package dependencies and relationships overview
-- **[GAME_FLOW.md](GAME_FLOW.md)** - Game flow, turn flow, and control flow diagrams
-
-## Quick Start
-
-See the build instructions below to compile and run the game.
-
-## Project Structure Overview
-
-For a comprehensive view of the project structure, see the detailed diagrams in:
-- **[Folder Structure](FOLDER_STRUCTURE.md)** - Complete class hierarchy
-- **[Folder Connections](FOLDER_CONNECTIONS.md)** - How packages interact
-- **[Game Flow](GAME_FLOW.md)** - Game execution flow
-
 ### Quick Structure Reference
 
 ```
