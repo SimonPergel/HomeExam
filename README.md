@@ -62,37 +62,6 @@ javac -cp ../gson.jar -d ../bin $(find . -name "*.java")
 java -cp ../bin:../gson.jar Main
 
 ```
-
-## What's Left for the Intro Game
-
-
-**1. Action cards (Base set)**
-
-    - You already have the plumbing (BasicCard.effect, EffectRegistry, action-phase loop).
-
-    - Next: implement the base-game action cards only (no expansion/era cards).
-    You’ve got Merchant Caravan and Goldsmith done; I can add the rest you need from your cards.json (base-only) the same way.
-
-**2. Costs & prerequisites**
-
-    - You added cost parsing—great. We’ll keep it strictly for base cards.
-
-    - If any base card has a prerequisite (e.g., needs settlement/city), we’ll enforce that via RuleValidator (still base-only).
-
-**3. Production mapping (base)**
-
-    - Replace the simplified production with base-game region mapping: production die → give resources from the player’s regions.
-
-    - Minimal principality model (just enough for base): settlements/cities row with their two adjacent region slots is enough to handle Storehouse/Weaver’s Shop/Iron Foundry later (still base set).
-
-**4. Events (base)**
-
-    - Already covered: Brigand, Trade, Celebration, Plentiful Harvest, Invention (hooked).
-
-    - Keep event handling aligned with base-game rules.
-
-**5. Networking (optional)**
-
     - Not required to be feature-complete; we keep the IO/network boundaries so you can plug it in later if you want, but we won’t add era/expansion logic.
 
 **Extensibility (no extra content implemented)**
